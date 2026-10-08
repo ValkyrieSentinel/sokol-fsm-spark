@@ -1,82 +1,97 @@
-# Sokol FSM SPARK 🛡️
+# Sokol FSM (SPARK Core) 🦅🧬
 
-[![SPARK 2014](https://img.shields.io/badge/SPARK-2014_Level_2-brightgreen.svg)](https://learn.adacore.com/)
-[![Formal Verification](https://img.shields.io/badge/Verification-100%25_Proved-success.svg)](#formal-verification-guarantees)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+> **Formally Verified, Biomimetic Multi-Topology Finite State Machine in Ada/SPARK**
 
-**Sokol FSM** is a formally verified Finite State Machine (FSM) core written in **Ada/SPARK 2014**, designed for high-throughput network security infrastructure, eBPF orchestrators, and custom firewalls.
+**Sokol FSM** is a mathematically proven state control core designed around the principles of **biomimetics and digital organisms**. The module functions as the Central Nervous System (CNS) and Immune System for the broader Sokol / Trinity ecosystem (eBPF, Rust, Zig DB, Hardware Filters).
 
-The primary objective of this project is to mathematically guarantee the **Absence of Run-Time Errors (AoRTE)** and enforce strict system safety invariants during critical security events.
+Built with **Ada/SPARK 2014** at verification level `--level=2`, the core guarantees the Absence of Run-Time Errors (**AoRTE**), strictly enforces state invariants, and protects the system against DoS exhaustion and split-brain desynchronization.
 
 ---
 
-## 🏛️ Multi-Topology Architecture
+## 🏛️ Architecture & Biomimetic Topologies
 
-The project implements and formally verifies **4 fundamental architectural FSM topologies** within a single encapsulated global context:
+The system unifies 5 interconnected topologies inspired by biological mechanisms:
 
-1. **Hierarchical (Nested States):** Manages high-level system states (`Init`, `Operational`, `Emergency_Isolation`) and their operational sub-states (`Active_Filtering`, `Degraded_Bypass`).
-2. **Parallel (Per-Interface Array):** Atomic status control over an array of network interfaces (`Interface_Id 1..4`), enabling parallel isolation across all ports.
-3. **Pipeline Processing Stage:** Models sequential packet inspection stages (`Ingress_eBPF` → `Anomaly_Check` → `Forwarded` / `Hardware_Drop`).
-4. **HA Quorum Clustering:** High-availability mechanism and Split-Brain protection for cluster nodes (`Primary_Leader`, `Secondary_Standby`, `Isolated_Node`).
-
----
-
-## 🔬 Formal Verification Guarantees
-
-Formal verification is carried out using `gnatprove` at `--level=2`, leveraging automated SMT solvers (Z3, CVC4, Alt-Ergo).
-
-### Formally Proven Guarantees (100% Green Proofs):
-* **Data & Flow Dependencies:** Complete absence of side effects, no uninitialized memory reads, and strictly encapsulated `Global` contracts.
-* **Termination (`Always_Terminates`):** Proven that all state getters and transition procedures strictly terminate in finite time.
-* **Safety Invariants (`for all` Quantification):** Proven that `Enforce_Global_Lockdown` atomically transitions **all** network interfaces into the `Iface_Isolated` state without exception, guaranteed by `Loop_Invariant`.
-* **Pipeline Integrity:** Proven that unverified or dropped packets can never reach the `Forwarded` state.
+1. **Hierarchical Topology (Central Nervous System / CNS):**
+   * Controls global life-cycle phases (`Init`, `Operational`, `Emergency_Isolation`).
+2. **Peripheral Topology (Network Receptors / Interfacing):**
+   * Handles independent monitoring and physical/virtual interface isolation (`Iface_Down`, `Iface_Active`, `Iface_Isolated`).
+3. **Pipeline Topology (Reflex Arc):**
+   * Processes kernel-space packets via eBPF probes with sequential state validation.
+4. **Cluster Topology (Node Symbiosis / High Availability):**
+   * Manages quorum and network node roles (`Primary_Leader`, `Secondary_Standby`, `Isolated_Node`).
+5. **Immunological Topology (Immune Response & Homeostasis):**
+   * **`Homeostatic_Rest`**: Healthy resting baseline state.
+   * **`Inflammatory_Alert`**: Inflammatory response and elevated readiness upon anomaly detection (Stress Load $\ge 30\%$).
+   * **`Active_Neutralization`**: Active attack suppression and anomalous traffic filtering (Stress Load $\ge 80\%$).
+   * **`System_Refractory`**: Mandatory recovery period to restore resources and prevent autoimmune exhaustion.
+   * **`Apoptosis_Quarantine`**: Controlled apoptosis (isolation of infected tissue/node) during Global Lockdown enforcement.
 
 ---
 
-## 🛠️ Toolchain & Requirements
+## 🔗 Integration with HSP (Heterogeneous State Protocol)
 
-* **GNAT / Ada Compiler:** 14.1.3 or newer
-* **GPRbuild:** 22.0.1 or newer
-* **Alire (Ada Package Manager):** 2.0+
-* **GNATprove / SPARK2014:** 15.1.0 (standalone bundle)
+Sokol FSM seamlessly integrates with the **HSP** protocol to ensure atomic synchronization across heterogeneous nodes:
+
+* **eBPF (Kernel Layer):** Instant $O(1)$ reflex drop of malicious packets.
+* **SPARK Core (Brain Layer):** Single Source of Truth that mathematically proves assumptions and executes global isolation decisions.
+* **Rust / Zig Orchestrator:** Propagates state epoch data and Vector Clocks via Zero-Copy Shared Memory.
 
 ---
 
-## 🚀 Quick Start
+## 🛠️ Prerequisites & Toolchain
+
+To build and formally verify the codebase, you need:
+
+* **[Alire](https://alire.ada.dev/)** (Ada Package Manager) >= 2.0
+* **GNAT Native Toolchain** (GCC for Ada)
+* **SPARK 2014 Toolchain** (`gnatprove`)
+
+---
+
+## 🚀 Quickstart
 
 ### 1. Clone the repository
 ```bash
-git clone [https://github.com/ValkyrieSentinel/sokol-fsm-spark.git](https://github.com/ValkyrieSentinel/sokol-fsm-spark.git)
+git clone https://github.com/ValkyrieSentinel/sokol-fsm-spark.git
 cd sokol-fsm-spark
-Run Formal Verification (SPARK Proofs)
-To execute the complete formal proof analysis, run:
 
-Bash
+### 2. Configure SPARK Toolchain (One-time setup)
+Ensure gnatprove is available in your $PATH. If SPARK is installed locally:
+
+```bash
+echo 'export PATH="$HOME/.local/spark/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+### 3. Run Formal Verification (gnatprove)
+Verify all contracts, preconditions, and postconditions at --level=2:
+
+```bash
 gnatprove -P sokol_fsm.gpr --level=2
-Expected gnatprove output:
 
-Plaintext
-Phase 1 of 3: generation of data representation information ...
-Phase 2 of 3: generation of Global contracts ...
-Phase 3 of 3: flow analysis and proof ...
-sokol_fsm.ads:45:16: info: postcondition proved
-sokol_fsm.ads:50:06: info: data dependencies proved
-sokol_fsm.ads:51:16: info: postcondition proved
-Build & Run Demo Executable
-Build the binary via Alire and run the interactive FSM simulation:
+Expected output: 100% proved invariants, zero out-of-bounds array accesses, and no unreachable code.
 
-Bash
+### 4. Build and Run Unit Tests
+
+```bash
 alr build
 ./obj/main
-📂 Project Structure
+
+### 🔬 Project Structure
 Plaintext
 sokol-fsm-spark/
+├── sokol_fsm.gpr         # GNAT Project File
+├── alire.toml            # Alire Manifest
 ├── src/
-│   ├── sokol_fsm.ads   # Package specification: types, abstract state, and SPARK contracts (Pre/Post)
-│   ├── sokol_fsm.adb   # Package body: transitions, Refined_State, and Loop_Invariants
-│   └── main.adb        # Entry point: runtime FSM demonstration
-├── sokol_fsm.gpr       # GPRbuild project file
-├── alire.toml          # Alire package manifest
-└── README.md
-📜 License
+│   ├── sokol_fsm.ads     # FSM Specification, SPARK Contracts & Types
+│   ├── sokol_fsm.adb     # FSM Body with Loop Invariants & Implementation
+│   └── main.adb          # Test Suite using pragma Assert
+└── README.md             # Project Documentation
+
+
+### 🛡️ License
 Distributed under the MIT License.
+
+Developed by ValkyrieSentinel.
+
+

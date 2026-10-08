@@ -23,11 +23,28 @@ is
       Peer_Alive : Boolean   := True;
    end record;
 
+   type Stress_Level is new Natural range 0 .. 100;
+   
+   type Immune_Response_Phase is 
+     (Homeostatic_Rest,      
+      Inflammatory_Alert,    
+      Active_Neutralization, 
+      System_Refractory,     
+      Apoptosis_Quarantine); 
+
+   type Immune_System_Context is record
+      Phase           : Immune_Response_Phase := Homeostatic_Rest;
+      System_Stress   : Stress_Level          := 0;
+      Antigen_Detected: Boolean               := False;
+      Refractory_Ticks: Natural               := 0;
+   end record;
+
    type System_Context is record
-      Main    : Main_State      := Init;
-      Sub     : Sub_State       := Idle_Monitoring;
-      Ifaces  : Interface_Array := (others => Iface_Down);
+      Main    : Main_State            := Init;
+      Sub     : Sub_State             := Idle_Monitoring;
+      Ifaces  : Interface_Array       := (others => Iface_Down);
       Cluster : Cluster_Node;
+      Immune  : Immune_System_Context;
    end record;
 
    function Get_Main_State return Main_State;
@@ -36,6 +53,9 @@ is
    function Get_Cluster_Role return Node_Role;
    function Get_Cluster_Health return Boolean;
    function Get_Cluster_Peer_Alive return Boolean;
+   
+   function Get_Immune_Phase return Immune_Response_Phase;
+   function Get_System_Stress return Stress_Level;
 
 
    procedure Set_Hierarchical_State (M : in Main_State; S : in Sub_State)
@@ -49,6 +69,7 @@ is
    with
      Global => (In_Out => State),
      Post   => Get_Main_State = Emergency_Isolation
+               and then Get_Immune_Phase = Apoptosis_Quarantine
                and then (for all I in Interface_Id => Get_Iface_State (I) = Iface_Isolated);
 
    
@@ -58,15 +79,30 @@ is
      Post => (if P.Stage'Old = Ingress_eBPF then P.Stage = Anomaly_Check
               elsif P.Stage'Old = Anomaly_Check then P.Stage = Forwarded);
 
-
+   
    procedure Evaluate_Quorum
    with
      Global => (In_Out => State),
      Post   => (if not Get_Cluster_Health then Get_Cluster_Role = Isolated_Node
                 elsif not Get_Cluster_Peer_Alive then Get_Cluster_Role = Primary_Leader);
 
-private
+   
+   procedure Trigger_Immune_Response (Load : in Stress_Level)
+   with
+     Global => (In_Out => State),
+     Pre    => Get_Immune_Phase /= Apoptosis_Quarantine,
+     Post   => Get_System_Stress = Load
+               and then (if Load >= 80 then Get_Immune_Phase = Active_Neutralization
+                         elsif Load >= 30 then Get_Immune_Phase = Inflammatory_Alert
+                         else Get_Immune_Phase = Homeostatic_Rest);
 
+   procedure Transition_To_Refractory
+   with
+     Global => (In_Out => State),
+     Pre    => Get_Immune_Phase = Active_Neutralization,
+     Post   => Get_Immune_Phase = System_Refractory and then Get_System_Stress = 0;
+
+private
 
    Current_Ctx : System_Context with Part_Of => State;
 
@@ -76,5 +112,8 @@ private
    function Get_Cluster_Role return Node_Role is (Current_Ctx.Cluster.Role);
    function Get_Cluster_Health return Boolean is (Current_Ctx.Cluster.Health_OK);
    function Get_Cluster_Peer_Alive return Boolean is (Current_Ctx.Cluster.Peer_Alive);
+   
+   function Get_Immune_Phase return Immune_Response_Phase is (Current_Ctx.Immune.Phase);
+   function Get_System_Stress return Stress_Level is (Current_Ctx.Immune.System_Stress);
 
 end Sokol_FSM;

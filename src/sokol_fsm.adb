@@ -9,9 +9,11 @@ is
       Current_Ctx.Sub  := S;
    end Set_Hierarchical_State;
 
+  
    procedure Enforce_Global_Lockdown is
    begin
-      Current_Ctx.Main := Emergency_Isolation;
+      Current_Ctx.Main         := Emergency_Isolation;
+      Current_Ctx.Immune.Phase := Apoptosis_Quarantine;
 
       for I in Interface_Id loop
          Current_Ctx.Ifaces (I) := Iface_Isolated;
@@ -37,5 +39,26 @@ is
          Current_Ctx.Cluster.Role := Primary_Leader;
       end if;
    end Evaluate_Quorum;
+
+   
+   procedure Trigger_Immune_Response (Load : in Stress_Level) is
+   begin
+      Current_Ctx.Immune.System_Stress := Load;
+
+      if Load >= 80 then
+         Current_Ctx.Immune.Phase := Active_Neutralization;
+      elsif Load >= 30 then
+         Current_Ctx.Immune.Phase := Inflammatory_Alert;
+      else
+         Current_Ctx.Immune.Phase := Homeostatic_Rest;
+      end if;
+   end Trigger_Immune_Response;
+
+
+   procedure Transition_To_Refractory is
+   begin
+      Current_Ctx.Immune.Phase         := System_Refractory;
+      Current_Ctx.Immune.System_Stress := 0;
+   end Transition_To_Refractory;
 
 end Sokol_FSM;
