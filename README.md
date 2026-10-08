@@ -56,37 +56,26 @@ To build and formally verify the codebase, you need:
 ## Quickstart
 
 ### 1. Clone the repository
-
-```bash
 git clone https://github.com/ValkyrieSentinel/sokol-fsm-spark.git
 cd sokol-fsm-spark
 
 ### 2. Configure SPARK Toolchain (One-time setup)
-
-Ensure `gnatprove` is available in your `$PATH`. If SPARK is installed locally:
-
-```bash
+Ensure `gnatprove` is available in your `$PATH`:
+export PATH="$HOME/.local/spark/bin:$PATH"
 echo 'export PATH="$HOME/.local/spark/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 
 ### 3. Run Formal Verification (gnatprove)
-
-Verify all contracts, preconditions, and postconditions at `--level=2`:
-
-```bash
 gnatprove -P sokol_fsm.gpr --level=2
 
 ### 4. Build and Run Unit Tests
-
-Compile the project binaries via Alire and run unit test assertions:
-
-```bash
 alr build
 ./obj/main
 
+---
+
 ## Project Structure
 
-```text
 sokol-fsm-spark/
 ├── sokol_fsm.gpr         # GNAT Project File
 ├── alire.toml            # Alire Manifest
@@ -95,6 +84,8 @@ sokol-fsm-spark/
 │   ├── sokol_fsm.adb     # FSM Body with Loop Invariants & Implementation
 │   └── main.adb          # Test Suite using pragma Assert
 └── README.md             # Project Documentation
+
+---
 
 ## License
 
