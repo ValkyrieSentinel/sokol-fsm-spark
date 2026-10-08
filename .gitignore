@@ -1,0 +1,23 @@
+# GPRbuild & Compilation Artifacts
+/obj/
+/bin/
+*.o
+*.ali
+*.bexch
+
+# SPARK / gnatprove Analysis Cache & Artifacts
+/gnatprove/
+*.spark
+*.flow
+
+# Alire Local Workspace & Toolchain
+/alire/
+/config/alire.toml
+alire.lock
+
+# Editor & System Artifacts
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
