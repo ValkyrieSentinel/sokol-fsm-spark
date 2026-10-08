@@ -74,18 +74,6 @@ alr build
 
 ---
 
-## Project Structure
-
-sokol-fsm-spark/
-├── sokol_fsm.gpr         # GNAT Project File
-├── alire.toml            # Alire Manifest
-├── src/
-│   ├── sokol_fsm.ads     # FSM Specification, SPARK Contracts & Types
-│   ├── sokol_fsm.adb     # FSM Body with Loop Invariants & Implementation
-│   └── main.adb          # Test Suite using pragma Assert
-└── README.md             # Project Documentation
-
----
 
 ## License
 
